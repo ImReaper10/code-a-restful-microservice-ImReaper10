@@ -9,6 +9,60 @@ app.use(express.json());
 // Put your implementation here
 // If necessary to add imports, please do so in the section above
 
+let users = [];
+let currentID = 1;
+
+app.post('/users', (req, res) => {
+    const { name, email } = req.body;
+    if (!name || !email) {
+        return res.status(400).json({ error: 'Name and email are required' });
+    }
+    const newUser = {
+        id: currentID++,
+        name,
+        email
+    };
+    users.push(newUser);
+    res.status(201).json(newUser);
+});
+
+
+app.get('/users/:id', (req, res) => {
+    const userID = parseInt(req.params.id, 10);
+    const user = users.find(u => u.id === userID);
+    if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+    }
+    res.json(user);
+});
+
+
+app.put('/users/:id', (req, res) => {
+    const userId = parseInt(req.params.id, 10);
+    const { name, email } = req.body;
+    if (!name || !email) {
+        return res.status(400).json({ error: 'Name and email are required' });
+    }
+    const userIndex = users.findIndex(u => u.id === userId);
+    if (userIndex === -1) {
+        return res.status(404).json({ error: 'User not found' });
+    }
+    users[userIndex] = { id: userId, name, email };
+    res.json(users[userIndex]);
+});
+
+
+app.delete('/users/:id', (req, res) => {
+    const userId = parseInt(req.params.id, 10);
+    const userIndex = users.findIndex(u => u.id === userId);
+    if (userIndex === -1) {
+        return res.status(404).json({ error: 'User is not found' });
+    }
+    users.splice(userIndex, 1);
+    res.status(204).send();
+});
+
+// Default route
 app.get('/', (req, res) => {
     res.send('Hello World!');
 });
